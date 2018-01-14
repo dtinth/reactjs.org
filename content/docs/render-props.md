@@ -321,4 +321,23 @@ class MouseTracker extends React.Component {
 }
 ```
 
-Since `Mouse` is a `PureComponent`, the render prop must also be a pure function. Since `this.props` and `this.state` can change over time, we should not use them in our render prop. (That’s why `renderTheCat` is defined as a `static` method.)
+Since `Mouse` is a `PureComponent`, the render prop must also be a pure function. Since `this.props` and `this.state` can change over time, we should not use these in our render prop. (That’s why `renderTheCat` is defined as a `static` method.)
+
+Another option is to make sure that `MouseTracker` never re-renders unnecessarily. We can make `MouseTracker` a `PureComponent`.
+
+```js
+class MouseTracker extends React.PureComponent {
+  render() {
+    return (
+      <div>
+        <h1>Move the mouse around!</h1>
+        <Mouse render={mouse => (
+          <Cat mouse={mouse} />
+        )}/>
+      </div>
+    );
+  }
+}
+```
+
+Since `MouseTracker` does not have a `state` and does not receive any `props`, the `MouseComponent` will never get re-rendered. In this case, it is safe to create the render prop inside `render()` because we know it will only be called once.
