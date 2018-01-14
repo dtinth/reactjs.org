@@ -287,8 +287,9 @@ class MouseTracker extends React.Component {
         <h1>Move the mouse around!</h1>
 
         {/*
-          This is bad! The value of the `render` prop will
-          be different on each render.
+          When the `MouseTracker` gets re-rendered, we pass a newly created function to `<Mouse />`.
+          Since `MouseTracker` is a normal `React.Component` and does not implement `componentShouldUpdate`,
+          it will get re-rendered each time its parent updates.
         */}
         <Mouse render={mouse => (
           <Cat mouse={mouse} />
@@ -299,21 +300,13 @@ class MouseTracker extends React.Component {
 }
 ```
 
-In this example, each time `<MouseTracker>` renders, it generates a new function as the value of the `<Mouse render>` prop, thus negating the effect of `<Mouse>` extending `React.PureComponent` in the first place!
+In this example, each time `<MouseTracker>` renders, it generates a new function as the value of the `<Mouse render>` prop, thus negating the effect of `<Mouse>` extending `React.PureComponent` in the first place! This is [the same caveat as passing a normal children prop](https://youtu.be/KYzlpRvWZ6c?t=18m52s).
 
-To get around this problem, you can sometimes define the prop as an instance method, like so:
+To get around this problem, you can create the render prop elsewhere, so that in `render()` we can pass that same function instance:
 
 ```js
 class MouseTracker extends React.Component {
-  constructor(props) {
-    super(props);
-
-    // This binding ensures that `this.renderTheCat` always refers
-    // to the *same* function when we use it in render.
-    this.renderTheCat = this.renderTheCat.bind(this);
-  }
-
-  renderTheCat(mouse) {
+  static renderTheCat (mouse) {
     return <Cat mouse={mouse} />;
   }
 
@@ -321,11 +314,11 @@ class MouseTracker extends React.Component {
     return (
       <div>
         <h1>Move the mouse around!</h1>
-        <Mouse render={this.renderTheCat} />
+        <Mouse render={MouseTracker.renderTheCat} />
       </div>
     );
   }
 }
 ```
 
-In cases where you cannot bind the instance method ahead of time in the constructor (e.g. because you need to close over the component's props and/or state) `<Mouse>` should extend `React.Component` instead.
+Since `Mouse` is a `PureComponent`, the render prop must also be a pure function. Since `this.props` and `this.state` can change over time, we should not use them in our render prop. (That’s why `renderTheCat` is defined as a `static` method.)
