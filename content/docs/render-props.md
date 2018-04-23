@@ -322,4 +322,4 @@ class MouseTracker extends React.Component {
 }
 ```
 
-In cases where you cannot define the prop statically (e.g. because you need to close over the component's props and/or state) `<Mouse>` should extend `React.Component` instead.
+In cases where you cannot define the prop statically (e.g. because you need to close over the component's props and/or state) you can send an arrow function and optimize elsewhere (e.g. making `Cat` extend `PureComponent` instead).
